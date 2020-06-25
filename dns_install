@@ -1,0 +1,340 @@
+#!/bin/bash
+
+echo " "
+echo " "
+echo " 		▓█████▄  ███▄    █   ██████     ██▓ ███▄    █   ██████ ▄▄▄█████▓ ▄▄▄       ██▓     ██▓      "
+echo " 		▒██▀ ██▌ ██ ▀█   █ ▒██    ▒    ▓██▒ ██ ▀█   █ ▒██    ▒ ▓  ██▒ ▓▒▒████▄    ▓██▒    ▓██▒      "
+echo " 		░██   █▌▓██  ▀█ ██▒░ ▓██▄      ▒██▒▓██  ▀█ ██▒░ ▓██▄   ▒ ▓██░ ▒░▒██  ▀█▄  ▒██░    ▒██░      "
+echo " 		░▓█▄   ▌▓██▒  ▐▌██▒  ▒   ██▒   ░██░▓██▒  ▐▌██▒  ▒   ██▒░ ▓██▓ ░ ░██▄▄▄▄██ ▒██░    ▒██░      "
+echo " 		░▒████▓ ▒██░   ▓██░▒██████▒▒   ░██░▒██░   ▓██░▒██████▒▒  ▒██▒ ░  ▓█   ▓██▒░██████▒░██████▒  "
+echo " 		 ▒▒▓  ▒ ░ ▒░   ▒ ▒ ▒ ▒▓▒ ▒ ░   ░▓  ░ ▒░   ▒ ▒ ▒ ▒▓▒ ▒ ░  ▒ ░░    ▒▒   ▓▒█░░ ▒░▓  ░░ ▒░▓  ░  "
+echo " 		 ░ ▒  ▒ ░ ░░   ░ ▒░░ ░▒  ░ ░    ▒ ░░ ░░   ░ ▒░░ ░▒  ░ ░    ░      ▒   ▒▒ ░░ ░ ▒  ░░ ░ ▒  ░  "
+echo " 		 ░ ░  ░    ░   ░ ░ ░  ░  ░      ▒ ░   ░   ░ ░ ░  ░  ░    ░        ░   ▒     ░ ░     ░ ░     "
+echo " 		   ░             ░       ░      ░           ░       ░                 ░  ░    ░  ░    ░  ░  "
+echo " 		 ░                                                                                          "
+echo " "
+echo " 						[Created By Anonimo501]  				    "
+echo " 					   [https://youtube.com/c/Anonimo501]  				    "
+echo " "
+echo " 					     Hola Bienvenid@s a DNS Install  				    "
+echo " 						     Version 1.0  					    "
+echo " "
+echo "		*******************************************************************************************"
+echo "		* Se recomienda tipear correctamente (sin errores) la informacion requerida por el script *"
+echo "		* ya que si se borra algun caracter generara caracteres adicionales dentro de los         *" 
+echo "		* archivos de configuracion el cual no es de mucho problema ya que podremos ir a          *"
+echo "		* las rutas y corregir manualmente los errores (Los errores son minimos).                 *"
+echo "		*******************************************************************************************"
+echo " "
+echo "		Si desea verifica las rutas despues de la instalacion para corregir"
+echo "		o verificar la instalacion las rutas de configuracion son las siguientes: "
+echo " "
+echo "		/etc/named.conf"
+echo "		/var/named/zona.directa"
+echo "		/var/named/zona.inversa"
+echo "		/etc/resolv.conf"
+echo "		/etc/hosts"
+echo " "
+read -rsp $'Press enter to continue...\n'
+
+echo " "
+echo "		***************************************"
+echo "		* iniciaremos la instalacion de DNS   *"
+echo "		***************************************"
+echo " "
+read -rsp $'Press enter to continue...\n'
+echo " "
+#instalamos el servicio DNS (bind y bind-utils)
+yum install bind bind-utils
+echo " "
+echo " Se Instalo Correctamente bind y bind-utls  "
+echo " "
+read -rsp $'Press enter to continue...\n'
+
+echo " "
+echo "		*********************************************"
+echo "		* habilitamos e iniciamos el servicio named *"
+echo "		*********************************************"
+echo " "
+read -rsp $'Press enter to continue...\n'
+systemctl enable named
+systemctl start named
+systemctl status named
+
+
+echo " "
+echo "		*********************************************"
+echo "		* habilitamos los puertos en el firewall    *"
+echo "		*********************************************"
+echo " "
+read -rsp $'Press enter to continue...\n'
+firewall-cmd --permanent --add-service=dns
+firewall-cmd --permanent --add-port=53/tcp
+firewall-cmd --permanent --add-port=53/udp
+firewall-cmd --reload
+
+echo " "
+echo "		*********************************************************"
+echo "		* Ingresa la ip del servidor DNS Ejemplo: 192.168.0.254 *"
+echo "		*********************************************************"
+read input
+
+echo " "
+echo "		*********************************************************"
+echo "		* Ingresa la ip de la Red Ejemplo: 192.168.0.0          *"
+echo "		*********************************************************"
+read input2
+
+echo " "
+echo "		*********************************************************"
+echo "		* Ingresa la mascara de  SubRed Ejemplo: 16 - 24        *"
+echo "		*********************************************************"
+read inp
+
+echo " "
+echo "		********************************************************************************"
+echo "		* Ingresa el dominio que deseas en la configuracion Ejemplo: anonimo501.local  *"
+echo "		********************************************************************************"
+read dominio
+
+echo " "
+echo "		*********************************************************"
+echo "		* Ingresa la ip de forma inversa Ejemplo: 0.168.192     *"
+echo "		*********************************************************"
+read ipinversa
+
+#se elimina el archivo named.conf para luego ser creado y modificado
+rm -rf /etc/named.conf
+
+echo " 
+
+//
+// named.conf
+//
+// Provided by Red Hat bind package to configure the ISC BIND named(8) DNS
+// server as a caching only nameserver (as a localhost DNS resolver only).
+//
+// See /usr/share/doc/bind*/sample/ for example named configuration files.
+//
+// See the BIND Administrator's Reference Manual (ARM) for details about the
+// configuration located in /usr/share/doc/bind-{version}/Bv9ARM.html
+
+options {
+        listen-on port 53 { $input; };
+        listen-on-v6 port 53 { ::1; };
+        directory       \"/var/named\";
+        dump-file       \"/var/named/data/cache_dump.db\";
+        statistics-file \"/var/named/data/named_stats.txt\";
+        memstatistics-file \"/var/named/data/named_mem_stats.txt\";
+        recursing-file  \"/var/named/data/named.recursing\";
+        secroots-file   \"/var/named/data/named.secroots\";
+        allow-query     { localhost; $input2/$inp;};
+
+        /*
+         - If you are building an AUTHORITATIVE DNS server, do NOT enable recursion.
+         - If you are building a RECURSIVE (caching) DNS server, you need to enable
+           recursion.
+         - If your recursive DNS server has a public IP address, you MUST enable access
+           control to limit queries to your legitimate users. Failing to do so will
+           cause your server to become part of large scale DNS amplification
+           attacks. Implementing BCP38 within your network would greatly
+           reduce such attack surface
+        */
+        recursion yes;
+
+        dnssec-enable yes;
+        dnssec-validation yes;
+
+        /* Path to ISC DLV key */
+        bindkeys-file \"/etc/named.iscdlv.key\";
+
+        managed-keys-directory \"/var/named/dynamic\";
+
+        pid-file \"/run/named/named.pid\";
+        session-keyfile \"/run/named/session.key\";
+};
+
+logging {
+        channel default_debug {
+                file \"data/named.run\";
+                severity dynamic;
+        };
+};
+
+zone \"$dominio\" IN {
+		type master;
+		file \"zona.directa\";
+		allow-update {none;};
+};
+
+zone \"$ipinversa.in-addr.arpa\" IN {
+		type master;
+		file \"zona.inversa\";
+		allow-update {none;};
+};
+
+include \"/etc/named.rfc1912.zones\";
+include \"/etc/named.root.key\";
+
+" >> /etc/named.conf
+
+echo " "
+echo " Listo!  "
+
+echo " "
+echo "		*********************************************"
+echo "		* Ahora Crearemos zona.directa              *"
+echo "		*********************************************"
+echo " "
+read -rsp $'Press enter to continue...\n'
+
+echo " "
+echo "		*********************************************************"
+echo "		* Ingresa el nombre del host (servidor) Ejemplo: dns1   *"
+echo "		* Esto cambiara automaticamente nombre del host 	*"
+echo "		* y se agregara a las zonas.			        *"
+echo "		*********************************************************"
+read host
+echo " "
+
+echo " "
+echo "		*********************************************************"
+echo "		* Ingresa la ip de tu ftp Ejemplo: 192.168.0.10         *"
+echo "		*********************************************************"
+read ftp
+
+echo " "
+echo "		*********************************************************"
+echo "		* Ingresa la ip de tu www Ejemplo: 192.168.0.11         *"
+echo "		*********************************************************"
+read www
+
+echo " "
+echo "		*********************************************************"
+echo "		* Ingresa la ip de tu mail Ejemplo: 192.168.0.12        *"
+echo "		*********************************************************"
+read mail
+
+#se cambia el nombre del host (Servidor)
+hostname $host
+
+# Se elimina el archivo zona.directa
+rm -rf /var/named/zona.directa
+
+echo "
+\$TTL 3H 
+@ IN SOA $host.$dominio. admin.$dominio. (
+					 16022020 ; serial 
+					 28800	  ; refresh 
+					 7200 	  ; retry 
+					 604800   ; expire 
+					 86400	  ; minimum 
+					 ) 
+@ 	IN NS $host.$dominio. 
+$host 	IN A $input 
+ftp 	IN A $ftp 
+www	IN A $www
+mail	IN A $mail
+" >> /var/named/zona.directa
+
+
+echo " "
+echo "		*********************************************"
+echo "		* Ahora Crearemos zona.inversa              *"
+echo "		*********************************************"
+echo " "
+read -rsp $'Press enter to continue...\n'
+
+# Se elimina el archivo zona.inversa
+rm -rf /var/named/zona.inversa
+
+echo " "
+echo "		*************************************************************"
+echo "		* Ingresa el ultimo octeto de la ip de tu ftp Ejemplo: 10   *"
+echo "		*************************************************************"
+read ft
+
+echo " "
+echo "		***********************************************************"
+echo "		* Ingresa el ultimo octeto de la ip de tu www Ejemplo: 11 *"
+echo "		***********************************************************"
+read ww
+
+echo " "
+echo "		************************************************************"
+echo "		* Ingresa el ultimo octeto de la ip de tu mail Ejemplo: 12 *"
+echo "		************************************************************"
+read mai
+
+echo "
+\$TTL 3H 
+@ IN SOA $host.$dominio. admin.$dominio. (
+                                         16022020 ; serial
+                                         28800    ; refresh
+                                         7200     ; retry
+                                         604800   ; expire
+                                         86400    ; minimum
+                                         )
+@	IN NS $host.$dominio.
+$ft	IN A $ftp
+$ww	IN A $www
+$mai	IN A $mail
+" >> /var/named/zona.inversa
+
+#echo " "
+#echo "		*********************************************"
+#echo "		* Añadimos las zonas al grupo named         *"
+#echo "		*********************************************"
+#echo " "
+#read -rsp $'Press enter to continue...\n'
+#chgrp named zona.directa zona.inversa
+
+echo " "
+echo "		*********************************************"
+echo "		* Verificamos la configuracion de las zonas *"
+echo "		*********************************************"
+echo " "
+read -rsp $'Press enter to continue...\n'
+
+named-checkzone zona.directa /var/named/zona.directa
+named-checkzone zona.inversa /var/named/zona.inversa
+
+echo " "
+echo "		*******************************************************************************"
+echo "		* Ahora se introducira el dominio y la ip del servidor al archivo resolv.conf *"
+echo "		* de la ruta /etc/resolv.conf                                                 *"
+echo "		*******************************************************************************"
+echo " "
+read -rsp $'Press enter to continue...\n'
+rm -rf /etc/resolv.conf
+echo "
+# search $dominio
+nameserver $input
+" >> /etc/resolv.conf
+
+echo " "
+echo "		************************************************************"
+echo "		* Ahora se introducira la ip el nombre de host y el fqdn   *"
+echo "		* el fqdn consta de el nombre del server y el dominio      *"
+echo "		* en la ruta /etc/hosts                                    *"
+echo "		************************************************************"
+echo " "
+read -rsp $'Press enter to continue...\n'
+echo "
+$input $host $host.$dominio
+" >> /etc/hosts
+
+echo " "
+echo "		*******************************************************************"
+echo "		* Ahora se verifica la correcta instalacion con un ping al fqdn   *"
+echo "		*******************************************************************"
+echo " "
+read -rsp $'Press enter to continue...\n'
+echo " "
+ping $host.$dominio
+echo " "
+echo "LISTO! Instalacion Terminada"
+echo "Nos veremos Pronto!"
+echo " "
+echo " PD: "
+echo " No olvides Configurar tu interface de Red Un saludo.  "
